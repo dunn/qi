@@ -29,8 +29,13 @@
      :short #\i
      :long "install"
      :arg-parser #'identity
-     :command "install"
-     :meta-var "PACKAGE"))
+     :meta-var "PACKAGE")
+    (:name :install-deps
+     :description "Install local dependencies for the specified system"
+     :short #\d
+     :long "install-deps"
+     :arg-parser #'identity
+     :meta-var "ASD-FILE"))
 
 
 (defun unknown-option (cond)
@@ -44,8 +49,23 @@
        ,@body)))
 
 
-;;; Qi Install ($ qi --install [package] / $ qi -i [package]) internals
+;;; Qi install-deps ($ qi --install-deps project.asd)
+(defun opt-install-deps (input)
+  "Install the dependencies locally for the system definition file provided as INPUT."
+  (let* ((asd-strings (cl-ppcre:split "\/" input))
+         (proj (string-trim ".asd" (car (last asd-strings))))
+         ;; see http://stackoverflow.com/a/8831029 for the `format' syntax
+         (dir-path (format nil "~{~A~^/~}"
+                           ;; If the provided path is absolute we
+                           ;; ignore the working directory
+                           (if (uiop:absolute-pathname-p input)
+                               (butlast asd-strings)
+                             (cons (uiop:getcwd) (butlast asd-strings)))))
+         (asd (make-pathname :directory dir-path :name proj :type "asd")))
+    (load asd)
+    (qi:install proj)))
 
+;;; Qi Install ($ qi --install [package] / $ qi -i [package]) internals
 (defun opt-install (opt)
   "Install a package to Qi global package directory. The package will be available
 in all future lisp sessions."
@@ -106,6 +126,8 @@ in all future lisp sessions."
      :usage-of "qi"
      :args "[Free-Args]"))
   (when-option (options :upgrade)
-    (run-qi-upgrade))
+               (run-qi-upgrade))
   (when-option (options :install)
-    (opt-install (getf options :install))))
+               (opt-install (getf options :install)))
+  (when-option (options :install-deps)
+               (opt-install-deps (getf options :install-deps))))
