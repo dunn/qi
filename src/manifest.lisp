@@ -15,7 +15,7 @@
 (defvar +manifest-packages+ ()
   "A list of known packages from manifest.lisp.")
 (defvar +manifest-file+
-  (fad:merge-pathnames-as-file (asdf:system-source-directory "qi") "manifest/manifest.lisp")
+  (uiop:merge-pathnames* "manifest/manifest.lisp" (asdf:system-source-directory "qi"))
   "PATHNAME to the qi manifest.lisp file.")
 
 (defstruct manifest-package
@@ -90,7 +90,7 @@ does not exist."
                       #'(lambda (x)
                           (let ((name (last
                                        (pathname-directory
-                                        (fad:pathname-directory-pathname x)))))
+                                        (uiop:pathname-directory-pathname x)))))
                             (with-open-file (s x)
                               (do ((line (read-line s ())
                                          (read-line s ())))

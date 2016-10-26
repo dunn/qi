@@ -239,17 +239,17 @@ and sys-path."
 (defun clone-git-repo (url dep)
   "Clones Git repository from <url>, and updates <dep> with the local
 src-path and sys-path."
-  (let ((clone-path (fad:merge-pathnames-as-directory
-                     (qi.paths:package-dir)
+  (let ((clone-path (uiop:merge-pathnames*
                      (concatenate 'string
                                   (dependency-name dep) "-"
-                                  (dependency-version dep) "/"))))
+                                  (dependency-version dep) "/")
+                     (qi.paths:package-dir))))
     (format t "~%---> Cloning repo from ~S" url)
     (format t "~%---> Cloning repo to ~S" (namestring clone-path))
     (git-clone url (namestring clone-path))
-    (if (probe-file (fad:merge-pathnames-as-file
-                     clone-path
-                     (concatenate 'string (dependency-name dep) ".asd")))
+    (if (probe-file (uiop:merge-pathnames*
+                     (concatenate 'string (dependency-name dep) ".asd")
+                     clone-path))
         (set-dependency-paths clone-path dep)
         (progn
           (format t "~%---X Failure to clone repository!")
@@ -265,17 +265,17 @@ src-path and sys-path."
 (defun clone-hg-repo (url dep)
   "Clones Mercurial repository from <url>, and updates <dep> with the
 local src-path and sys-path."
-  (let ((clone-path (fad:merge-pathnames-as-directory
-                     (qi.paths:package-dir)
+  (let ((clone-path (uiop:merge-pathnames*
                      (concatenate 'string
                                   (dependency-name dep) "-"
-                                  (dependency-version dep) "/"))))
+                                  (dependency-version dep) "/")
+                     (qi.paths:package-dir))))
     (format t "~%---> Cloning repo from ~S" url)
     (format t "~%---> Cloning repo to ~S" (namestring clone-path))
     (hg-clone url (namestring clone-path))
-    (if (probe-file (fad:merge-pathnames-as-file
-                     clone-path
-                     (concatenate 'string (dependency-name dep) ".asd")))
+    (if (probe-file (uiop:merge-pathnames*
+                     (concatenate 'string (dependency-name dep) ".asd")
+                     clone-path))
         (set-dependency-paths clone-path dep)
         (progn
           (format t "~%---X Failure to clone repository!")
@@ -291,7 +291,7 @@ local src-path and sys-path."
   (let ((out-file (concatenate 'string
                                 (dependency-name dep) "-"
                                 (dependency-version dep) ".tar.gz")))
-    (fad:merge-pathnames-as-file (+dep-cache+) (pathname out-file))))
+    (uiop:merge-pathnames* (pathname out-file) (+dep-cache+))))
 
 (defun unpack-tar (dep)
   (let* ((tar-path (tarball-path dep))
@@ -314,11 +314,11 @@ local src-path and sys-path."
 
 (defun set-dependency-paths (out-path dep)
   "Update an a dependency's src-path and sys-path."
-  (let ((sys-path (fad:merge-pathnames-as-directory
-                   (qi.paths:package-dir)
+  (let ((sys-path (uiop:merge-pathnames*
                    (concatenate 'string
                                 (dependency-name dep) "-"
-                                (dependency-version dep) "/"))))
+                                (dependency-version dep) "/")
+                   (qi.paths:package-dir))))
     (setf (dependency-src-path dep) out-path)
     (setf (dependency-sys-path dep) sys-path)))
 

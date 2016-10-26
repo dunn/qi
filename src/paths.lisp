@@ -18,10 +18,10 @@
 
 
 (defun +dep-cache+ ()
-  (fad:merge-pathnames-as-directory
+  (uiop:merge-pathnames*
+   #P"qi/archives/"
    (or (uiop:getenv "TMPDIR")
-       "/tmp")
-   #P"qi/archives/"))
+       "/tmp")))
 
 ;; Project local paths
 
@@ -31,14 +31,16 @@ Qi is not running in the context of a project.")
 
 (defun project-dir (proj)
   "Pathname/directory for <proj>."
-  (asdf:system-relative-pathname proj (qi.util:sym->str proj)))
+  (asdf:system-source-directory proj))
 
 (defun qi-dir ()
-  (fad:merge-pathnames-as-directory
-   (project-dir +project-name+)
-   (ensure-directories-exist #P".dependencies/")))
+  (ensure-directories-exist
+   (uiop:merge-pathnames*
+    #P".dependencies/"
+    (project-dir +project-name+))))
 
 (defun package-dir ()
-  (fad:merge-pathnames-as-directory
-   (project-dir +project-name+)
-   (ensure-directories-exist #P".dependencies/packages/")))
+  (ensure-directories-exist
+   (uiop:merge-pathnames*
+    #P".dependencies/packages/"
+    (project-dir +project-name+))))
